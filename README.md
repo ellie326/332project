@@ -1,5 +1,8 @@
 # 332project
 
+Progress Check: \
+[Week 1](#progress-week-1-1017-1020)
+
 
 ## Progress Week 1 (10/17~10/20) 
 

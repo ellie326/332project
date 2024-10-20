@@ -12,7 +12,7 @@ Brainstorming ideas for using AI tech.
 Schedule overall milestones 
 
 ### Individual Goal 
-- no individual goal yet
+- no separate goal yet
 - every member individually research on how to design the project and use AI tech. until the next team meeting  
 
 

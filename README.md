@@ -19,8 +19,13 @@ Schedule overall milestones
 ## Progress Week 2 (10/21~10/27)
 
 ### Progress in the week 
+Define milestones for progress.
 
+#### Milestone
+1. Create input and output data.
+2. Develop the worker algorithm.
+3. Implement worker-master communication.
+4. Implement overall sorting.
 ### Goal of the next week 
-
+Setting up the project environment.
 ### Individual Goal 
-

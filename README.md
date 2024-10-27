@@ -29,3 +29,6 @@ Define milestones for progress.
 ### Goal of the next week 
 Setting up the project environment.
 ### Individual Goal 
+JunHyeok: research worker-master communication methods
+JaeWan: research worker algorithm and sorting/partitioning.
+JiHyun: research input/output structure

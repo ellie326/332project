@@ -30,5 +30,21 @@ Define milestones for progress.
 Setting up the project environment.
 ### Individual Goal 
 JunHyeok: research worker-master communication methods
+
 JaeWan: research worker algorithm and sorting/partitioning.
+
 JiHyun: research input/output structure
+
+
+## Progress Week 3 (10/28~11/3)
+
+### Progress in the week
+
++ [distribued sorting](https://github.com/ellie326/332project/blob/e27bbf1035a94368238c90d0aa1eab1374cde9ce/report/week3_algorithm%20for%20sorting.pdf)
+
+### Goal of the next week
+
+Share progress, and create detailed individual plan
+
+
+### Individual goal

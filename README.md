@@ -42,13 +42,16 @@ JiHyun: research input/output structure
 
 + [distribued sorting](https://github.com/ellie326/332project/blob/e27bbf1035a94368238c90d0aa1eab1374cde9ce/report/week3_algorithm%20for%20sorting.pdf)
 + [sorting design (AI)](https://github.com/ellie326/332project/blob/57a21db711c9bf9cfb359c10a30065d1f86fb7ab/report/sortingDesign.md)
++ [Communication](https://github.com/ellie326/332project/blob/57a21db711c9bf9cfb359c10a30065d1f86fb7ab/report/Communication.md)
 
 ### Goal of the next week
 
-Share above progress
-\Create detailed individual plan and start coding 
+Share above progress,
+Create detailed individual plan and start coding 
 
 
 ### Individual goal
 
 Jihyun: research input/output structure (Due to a delay in accessing through the firewall, I couldn't research input and output, so this week I used AI to draft pseudocode (refer to the sorting design (AI) above). Therefore, this week, I plan to look into the input and output that I couldn't cover last week) 
+
+JunHyeok: write pseudo code for communication based on Sorting algorithm and data flow.

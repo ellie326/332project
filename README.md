@@ -59,7 +59,7 @@ JunHyeok: write pseudo code for communication based on Sorting algorithm and dat
 ## Progress Week 4 (11/4~11/10)
 
 ### Progress in the week
-+ [shuffle alg]([addr](https://github.com/ellie326/332project/blob/main/report/shuffle%20algorithm.md))
++ [shuffle alg](https://github.com/ellie326/332project/blob/main/report/shuffle%20algorithm.md)
 
 ### Goal of the next week
 

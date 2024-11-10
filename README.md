@@ -60,7 +60,14 @@ JunHyeok: write pseudo code for communication based on Sorting algorithm and dat
 
 ### Progress in the week
 + [shuffle alg](https://github.com/ellie326/332project/blob/main/report/shuffle%20algorithm.md)
++ [communication](https://github.com/ellie326/332project/blob/main/report/communication_pseudocode.md)
 
 ### Goal of the next week
+Implement basic algorithms
 
 ### Individual goal
+JaeWan: implement sorting inside single disk
+
+JunHyeok: implement gathering information from workers, deciding the key.
+
+JiHyun: implement shuffle algorithm

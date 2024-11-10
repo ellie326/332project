@@ -52,6 +52,15 @@ Create detailed individual plan and start coding
 
 ### Individual goal
 
-Jihyun: research input/output structure (Due to a delay in accessing through the firewall, I couldn't research input and output, so this week I used AI to draft pseudocode (refer to the sorting design (AI) above). Therefore, this week, I plan to look into the input and output that I couldn't cover last week) 
+Jihyun: research on shuffle algorithm (ppt pg 12) 
 
 JunHyeok: write pseudo code for communication based on Sorting algorithm and data flow.
+
+## Progress Week 4 (11/4~11/10)
+
+### Progress in the week
++ [shuffle alg](addr)
+
+### Goal of the next week
+
+### Individual goal

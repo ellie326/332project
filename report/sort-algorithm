@@ -4,7 +4,7 @@ worker machine에서 수행할 sort를 구현해본다.
 
 후에 communication이 구현되어야 warker-master 통신으로 sampling 과정을 거치고 정확한 partition key를 이용해서 partition 과정을 구현할 수 있을 것이라 생각한다.
 
---- scala
+```scala
 import scala.io.Source
 import java.io.{File, PrintWriter}
 import scala.concurrent._
@@ -122,5 +122,4 @@ object WorkerSortPartition {
     }
   }
 }
-
----
+```

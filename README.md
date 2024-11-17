@@ -71,3 +71,19 @@ JaeWan: implement sorting inside single disk
 JunHyeok: implement gathering information from workers, deciding the key.
 
 JiHyun: implement shuffle algorithm
+
+## Progress Week 5 (11/11~11/17)
+
+### Progress in the week
++ [shuffle pseudocode](https://github.com/ellie326/332project/blob/main/report/ShufflePseudocode.md)
+
+### Goal of the next week
+Combine sorting algorithms 
+Prepare Progress Presentation 
+
+### Individual goal
+JaeWan: 
+
+JunHyeok: 
+
+JiHyun: 

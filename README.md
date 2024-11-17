@@ -76,6 +76,7 @@ JiHyun: implement shuffle algorithm
 
 ### Progress in the week
 + [shuffle pseudocode](https://github.com/ellie326/332project/blob/main/report/ShufflePseudocode.md)
++ [sort-algorithm](https://github.com/ellie326/332project/blob/a92b3d1124c0c2916c7ffbfefb5cfc0c2e169ac3/report/sort-algorithm.md)
 
 ### Goal of the next week
 Combine sorting algorithms 

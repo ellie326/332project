@@ -6,7 +6,7 @@ This doc is about shuffle in ppt 12 page.
 
 1. gRPC 서버 인터페이스
 
-```
+```scala
 syntax = "proto3";
 
 service ShuffleService {
@@ -33,7 +33,7 @@ amount = 전송하려는 데이터의 양
 
 
 2. shuffle
-```
+```scala
 import io.grpc.{Server, ServerBuilder}
 import shuffle.{ShuffleServiceGrpc, TransferRequest, TransferResponse} 
 import scala.concurrent.Future
@@ -79,7 +79,7 @@ worker 갯수를 알 수 있는지??
 
 -> 다음 팀별 미팅때 같이 얘기해본 뒤 해당하는 코드 작성 시작하면 될 것 같다. 
 
-```
+```scala
 if (workers.contains(sender) && workers.contains(receiver)) {
   // 교환할 최대 `key-value` 쌍 수를 정합니다. 예를 들어, 10개로 제한.
   val maxExchangeCount = 10
@@ -100,7 +100,7 @@ if (workers.contains(sender) && workers.contains(receiver)) {
 
 갯수만큼만 수정한다고 가정했을때 위와 같이 수정하면 될 것이다.
 
-```
+```scala
 // 워커 데이터 모델
 case class WorkerData(data: mutable.Map[String, mutable.Map[String, String]]) {
   def decrease(nodeType: String, keyValuePairs: Map[String, String]): Unit = {
@@ -119,7 +119,7 @@ case class WorkerData(data: mutable.Map[String, mutable.Map[String, String]]) {
 
 decrease 와 increase 함수에서는 해당하는 key-value 쌍의 데이터를 제거 및 추가할 수 있도록 하였다. 
 
-```
+```scala
 object ShuffleServiceServer {
   def start(workers: mutable.Map[Int, WorkerData], targetNode: Map[Int, String], port: Int): Unit = {
     val server = ServerBuilder
@@ -137,7 +137,7 @@ object ShuffleServiceServer {
 위의 객체는 server 를 build 하고 시작하는 과정을 나타낸다. 
 
 3. worker client
-```
+```scala
 import io.grpc.ManagedChannelBuilder
 import shuffle.{ShuffleServiceGrpc, TransferRequest}
 
@@ -167,7 +167,7 @@ class Worker(workerId: Int, initialData: Map[String, Map[String, String]], targe
 
 
 4. shuffle manager 
-```
+```scala
 import scala.collection.mutable
 
 object ShuffleManager {
@@ -211,7 +211,7 @@ object ShuffleManager {
 }
 ```
 
-```
+```scala
   +) 추가 : 
   def main(args: Array[String]): Unit = {
     // 각 워커의 초기 데이터 설정 (key-value 형태로 저장)

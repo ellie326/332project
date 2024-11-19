@@ -28,7 +28,7 @@ libraryDependencies ++= Seq(
 
 ### Server Implementation (NettySortServer.scala)
 The server listens for incoming connections, receives a list of numbers from the client, sorts them, and sends back the sorted list.
-```
+```scala
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.{ChannelInitializer, ChannelOption, EventLoopGroup, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.channel.nio.NioEventLoopGroup
@@ -80,7 +80,7 @@ class SortHandler extends SimpleChannelInboundHandler[String] {
 ### Client Implementation (NettySortClient.scala)
 The client connects to the server, sends a list of numbers to be sorted, and receives the sorted result.
 
-```
+```scala
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.{ChannelInitializer, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.channel.nio.NioEventLoopGroup

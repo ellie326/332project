@@ -37,7 +37,7 @@ Worker들은 master로부터 받은 pivot 데이터를 기반으로 다른 Worke
 
 그리고, 분할된 데이터를 알맞은 worker 로 데이터 전송. 이때, sendToWorker 함수를 사용하여 비동기적으로 데이터를 전송시킴. 
 
-```
+```scala
 def shuffleData(workers: Map[Int, WorkerData], pivots: Array[Int])(implicit ec: ExecutionContext): Unit = {
   workers.par.foreach { case (workerId, workerData) =>
     // 1. 데이터를 분할
@@ -57,7 +57,7 @@ def shuffleData(workers: Map[Int, WorkerData], pivots: Array[Int])(implicit ec: 
 
 위에서 언급한 sendToWorker 는 전송하려는 worker 의 ID 를 기반으로 데이터를 key-value 형태로 gRPC 메시지로 전송. 이때, 전송 받아야하는 worker 에 데이터를 저장할 수 없다면 일정 시간 이후 재시도를 하는 로직을 추가하였다. 
 
-```
+```scala
 def sendToWorker(
   workerId: Int,
   data: Map[String, Int],
@@ -97,7 +97,7 @@ def sendToWorker(
 
 마지막으로 partitionData 함수는 worker 내에서 pivot 을 기준으로 data 들을 분할하는 함수이다. 
 
-```
+```scala
 class WorkerData(data: Map[String, Int]) {
   def partitionData(pivots: Array[Int]): Array[Map[String, Int]] = {
     val partitions = Array.fill(pivots.length + 1)(mutable.Map[String, Int]())

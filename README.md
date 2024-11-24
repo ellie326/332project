@@ -88,14 +88,14 @@ no individual goal (need to work together)
 ## Progress Week 6 (11/18~11/24)
 
 ### Progress in the week
-+ [internal sorting 수정](https://github.com/ellie326/332project/blob/main/report/distributed%20sorting_edited%20version.pdf)
-decide which communication method to use -> decided to use "gRPC"
-basic communication part done
-sampling and partitioning on master machine done
++ [internal sorting 수정](https://github.com/ellie326/332project/blob/main/report/distributed%20sorting_edited%20version.pdf) \
+decide which communication method to use -> decided to use "gRPC" \
+basic communication part done \
+sampling and partitioning on master machine done \
 documentation on misunderstanding and feedbacks from the progress presentation session 
 
 ### Goal of the next week
-Debug on internal sorting and shuffling 
+Debug on internal sorting and shuffling \
 make test cases 
 
 ### Individual goal

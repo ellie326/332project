@@ -5,7 +5,7 @@ ppt 기준 이번 프로젝트에서는 크게 네가지 단계가 있는 것으
 먼저, 올바른 데이터 포맷으로 사용되는지를 확인해보아야한다. 
 각 데이터는 길이가 100바이트이고, 10 byte 는 key 로 사용, 90 byte는 value 로 사용한다) 
 
-```
+```scala
 import java.io._
 
 def generateData(filePath: String, numRecords: Int): Unit = {
@@ -23,7 +23,7 @@ def generateData(filePath: String, numRecords: Int): Unit = {
 ### 2. 로컬에서 데이터 정렬 (ppt 9페이지 참고) 
 그 다음 첫번째 challenge 가 주어진다. 로컬 메모리가 부족하면 데이터를 chunck 로 나눠서 각 chuck 별로 정렬 한 다음 합쳐주는 과정이 필요하다 
 아래의 코드에서 각 chunck 를 정렬한 다음 file 에 저장하는 과정에 대한 디자인을 작성하였다. 
-```
+```scala
 import scala.io.Source
 import java.io._
 
@@ -39,7 +39,7 @@ def sortChunk(inputFilePath: String, outputFilePath: String): Unit = {
 ### 3. Distributed sorting 
 위에서 정렬된 파일들을 합해서 저장해주어야하는데 각 파일별로 첫 data 를 확인하여 가장 작은 key 를 가진 data 를 result file 에 작성하는 방식으로 구현해보고자 한다. 
 이미 각 파일들은 정렬된 상태일 것이기 때문에 각 파일의 첫 data 만 확인해도 된다.
-```
+```scala
 import scala.collection.mutable
 import java.io._
 
@@ -69,7 +69,7 @@ def mergeSortedFiles(sortedFiles: List[String], outputFilePath: String): Unit = 
 마지막으로 java.net 을 사용해 마스터가 각 worker 에게 작업을 분배하는 과정이 필요하다. 
 master는 각 worker 에게 특정 data 를 정렬하도록 할당할 것이고 worker 는 정렬 후 master 가 지정한 파일에 결과를 저장할 것이다. 
 master:  
-```
+```scala
 import java.net.ServerSocket
 import java.io._
 
@@ -97,7 +97,7 @@ class WorkerHandler(socket: Socket) extends Runnable {
 ```
 
 worker: 
-```
+```scala
 import java.net.Socket
 import java.io._
 

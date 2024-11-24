@@ -52,6 +52,55 @@ Create detailed individual plan and start coding
 
 ### Individual goal
 
-Jihyun: research input/output structure (Due to a delay in accessing through the firewall, I couldn't research input and output, so this week I used AI to draft pseudocode (refer to the sorting design (AI) above). Therefore, this week, I plan to look into the input and output that I couldn't cover last week) 
+Jihyun: research on shuffle algorithm (ppt pg 12) 
 
 JunHyeok: write pseudo code for communication based on Sorting algorithm and data flow.
+
+## Progress Week 4 (11/4~11/10)
+
+### Progress in the week
++ [shuffle alg](https://github.com/ellie326/332project/blob/main/report/shuffle%20algorithm.md)
++ [communication](https://github.com/ellie326/332project/blob/main/report/communication_pseudocode.md)
+
+### Goal of the next week
+Implement basic algorithms
+
+### Individual goal
+JaeWan: implement sorting inside single disk
+
+JunHyeok: implement gathering information from workers, deciding the key.
+
+JiHyun: implement shuffle algorithm
+
+## Progress Week 5 (11/11~11/17)
+
+### Progress in the week
++ [shuffle pseudocode](https://github.com/ellie326/332project/blob/main/report/ShufflePseudocode.md)
++ [sort-algorithm](https://github.com/ellie326/332project/blob/a92b3d1124c0c2916c7ffbfefb5cfc0c2e169ac3/report/sort-algorithm.md)
+
+### Goal of the next week
+Combine sorting algorithms 
+Prepare Progress Presentation 
+
+### Individual goal
+no individual goal (need to work together) 
+
+## Progress Week 6 (11/18~11/24)
+
+### Progress in the week
++ [internal sorting 수정](https://github.com/ellie326/332project/blob/main/report/distributed%20sorting_edited%20version.pdf) 
+- decide which communication method to use -> decided to use "gRPC"
+- basic communication part done
+- sampling and partitioning on master machine done
+- documentation on misunderstanding and feedbacks from the progress presentation session 
+
+### Goal of the next week
+- Debug on internal sorting and shuffling
+- Make test cases 
+
+### Individual goal
+JaeWan: make test cases & be ready to combine worker sorting algorithm with communication 
+
+JiHyun: implement shuffling 
+
+

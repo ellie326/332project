@@ -1,0 +1,16 @@
+# Project exclude paths
+/.idea/
+/out/
+
+/sdproject/.idea/
+/sdproject/.bsp/
+/sdproject/.settings/
+/sdproject/lib/
+/sdproject/lib_managed/
+/sdproject/recitations/
+/sdproject/submission/
+/sdproject/target/
+/sdproject/.classpath
+/sdproject/.project
+/sdproject/build.sbt
+

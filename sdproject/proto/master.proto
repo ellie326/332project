@@ -1,15 +1,9 @@
 syntax = "proto3";
 
+import "communication.proto"
+
 package master;
 
 service Master {
   rpc register (RegisterRequest) returns (RegisterResponse);
-}
-
-message RegisterRequest {
-  string ip = 1;
-}
-
-message RegisterResponse {
-  string ip = 1;
 }

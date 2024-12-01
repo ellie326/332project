@@ -104,4 +104,14 @@ JaeWan: make test cases & be ready to combine worker sorting algorithm with comm
 
 JiHyun: implement shuffling 
 
+## Progress Week 7 (11/25~12/1)
 
+### Progress in the week
+- worker, DataProcess, master.scala and etc files coded
+- but still working on testing  
+
+### Goal of the next week
+- testing & debugging after genSort 
+
+### Individual goal
+no Individual goal 

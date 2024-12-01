@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package worker;
+
+message Data{
+  bytes key=1;
+  bytes value=1;
+}

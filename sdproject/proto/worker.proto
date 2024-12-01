@@ -1,18 +1,9 @@
 syntax = "proto3";
 
-package worker;
+import "communication.proto"
+
 
 service Worker {
   rpc distributeStart (DistributeStartRequest) returns (DistributeStartResponse);
   rpc sortStart (SortStartRequest) returns (SortStartResponse);
 }
-
-message DistributeStartRequest {
-  repeated string ranges = 1;
-}
-
-message DistributeStartResponse {}
-
-message SortStartRequest {}
-
-message SortStartResponse {}

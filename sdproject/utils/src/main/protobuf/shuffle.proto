@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "data.proto";
+package com.orange.proto;
+
+message ShuffleStartRequest {
+  map <string, bytes> ranges=1;
+}
+
+message ShuffleStartResponse{
+}
+
+message ShuffleRequest{
+  string ip=1;
+  repeated Data data=2;
+}
+
+message ShuffleResponse{
+}
+
+message ShuffleCompleteRequest{
+  string ip=1;
+}
+
+message ShuffleCompleteResponse{
+}

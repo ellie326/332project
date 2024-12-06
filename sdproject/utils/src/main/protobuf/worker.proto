@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "shuffle.proto";
+import "sort.proto";
+
+package com.orange.proto;
+
+
+service Worker {
+  rpc startShuffle (ShuffleStartRequest) returns (ShuffleStartResponse);
+  rpc shuffle(ShuffleRequest) returns (ShuffleResponse);
+  rpc mergeSortStart (MergeSortStartRequest) returns (MergeSortStartResponse);
+}

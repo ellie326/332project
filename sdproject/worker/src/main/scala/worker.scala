@@ -50,7 +50,7 @@ object Worker extends App {
   //  (ip, port)
   //}
 
-  private val masterIp: String = NetworkConfig.ip
+  private val masterIp: String = "10.1.25.21"
   private val masterPort: Int = 50051
 
   private def CheckAndParseArgument(args: List[String]): Map[String, List[String]] = {

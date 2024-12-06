@@ -1,0 +1,14 @@
+syntax = "proto3";
+import "data.proto";
+
+package com.orange.proto;
+
+
+message RegisterRequest {
+  string ip = 1;
+  repeated Data samples = 2;
+}
+
+message RegisterResponse {
+  string ip = 1;
+}

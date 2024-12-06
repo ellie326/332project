@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package com.orange.proto;
+
+message MergeSortStartRequest{
+}
+
+message MergeSortStartResponse{
+}
+
+message MergeSortCompleteRequest{
+  string ip = 1;
+}
+
+message MergeSortCompleteResponse{ 
+}

@@ -202,7 +202,7 @@ class DataProcess(InputDirectories: List[String],OutputDirectory: String){
 
         //merge sort 결과 block 단위로 저장 
         val SaveMergeSortResult: Iterator[List[Data]] =
-        MergeSortResult.grouped(DataConfig.writeBlockSize) map (_.toList)
+        MergeSortResult.grouped(DataConfig.blockConfig) map (_.toList)
 
         try {
             SaveMergeSortResult foreach (records => saveData(OutputDirectory, records))

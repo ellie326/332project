@@ -1,4 +1,4 @@
-package worker
+package com.orange.worker
 
 object DataConfig{
     val length_key: Int = 10
@@ -7,4 +7,5 @@ object DataConfig{
 
     val num_sample: Int = 1000
     val blockConfig: Int = 20*1000 
+    val writeBlockSize: Int = blockConfig*length_data 
 }

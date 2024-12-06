@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "register.proto";
+import "shuffle.proto";
+import "sort.proto";
+
+package com.orange.proto;
+
+service Master {
+  rpc register (RegisterRequest) returns (RegisterResponse);
+  rpc shuffleComplete (ShuffleCompleteRequest)  returns (ShuffleCompleteResponse);
+  rpc mergeSortComplete (MergeSortCompleteRequest)  returns (MergeSortCompleteResponse);
+}

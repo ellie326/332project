@@ -1,29 +1,56 @@
-package worker
+package com.orange.worker
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.annotation.tailrec
-
-import worker.WorkerGrpc
-import worker.{DistributeStartRequest, DistributeStartResponse, SortStartRequest, SortStartResponse}
+import com.orange.proto.register._
+import com.orange.proto.data._
+import com.orange.proto.shuffle._
+import com.orange.proto.sort._
+import com.orange.proto.master._
+import com.orange.proto.worker._
 
 import io.grpc.{Server, ServerBuilder}
-import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
-import java.net.InetAddress
 
+
+import com.typesafe.scalalogging.Logger
+import scala.concurrent.{Future, Promise, Await, ExecutionContext, blocking}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{ExecutionContext, Future}
+import scala.annotation.tailrec
+import scala.async.Async.{async, await}
+import scala.collection.SortedMap
+import scala.io.BufferedSource
+import com.google.protobuf.ByteString
+import com.orange.bytestring_ordering.ByteStringOrdering._
+import scala.math.Ordered.orderingToOrdered
+
+import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
+
+import com.orange.network.NetworkConfig
 
 
 object Worker extends App {
+  implicit val ec: ExecutionContext = ExecutionContext.global
   private val logger: Logger = Logger("Worker")
   private val arguments: Map[String, List[String]] = CheckAndParseArgument(args.toList)
-
+  logger.info(s"${NetworkConfig.ip}, here")
   private val inputDirectories: List[String] = arguments("-I")
-  private val outputDirectory: String = arguments("-O")
+  private val outputDirectory: String = arguments("-O").head
+  //private val workerNum = arguments("-N").head.toInt
+
 
   private val dataProcessor : DataProcess = new DataProcess(inputDirectories,outputDirectory)
 
-  private val ip: String = "127.0.0.1"
-  private val port: Int = 60051
-  private val masterIp: String = "141.223.16.227"
+  private val ip: String = "2.2.2.101"
+  private val port: Int = 50052
+
+  // 워커 IP 리스트와 기본 포트 설정
+  //val workerIps = List("2.2.2.101", "2.2.2.102", "2.2.2.103")
+  //val basePort = 50051
+  //val workers = workerIps.zipWithIndex.map { case (ip, idx) =>
+  //  val port = basePort + idx // 인덱스를 이용해 고유 포트 생성
+  //  (ip, port)
+  //}
+
+  private val masterIp: String = NetworkConfig.ip
   private val masterPort: Int = 50051
 
   private def CheckAndParseArgument(args: List[String]): Map[String, List[String]] = {
@@ -42,63 +69,79 @@ object Worker extends App {
   }
 
 
-  @tailrec
+  @scala.annotation.tailrec
   private def ParseArgument(map: Map[String, List[String]], previousOption: String, args: List[String]): Map[String, List[String]] = {
     args match {
       case Nil => map
 
-      case "-I" :: Remainder =>
-        ParseArgument(map, "-I", Remainder)
+      case "-I" :: remainder =>
+        ParseArgument(map, "-I", remainder)
 
-      case "-O" :: Remainder =>
-        ParseArgument(map, "-O", Remainder)
+      case "-O" :: remainder =>
+        ParseArgument(map, "-O", remainder)
 
-      case value :: Remainder if previousOption.nonEmpty =>
+      //case "-N" :: remainder => // -P 옵션 추가
+        //ParseArgument(map, "-N", remainder)
 
-        val updatedMap = map + (previousOption -> value)
+      case value :: remainder if previousOption.nonEmpty =>
+        // Wrap `value` in a List to match the map type
+        val updatedMap = map + (previousOption -> (map.getOrElse(previousOption, List()) :+ value))
+        ParseArgument(updatedMap, "", remainder)
 
-        ParseArgument(updatedMap, "", Remainder)
-
-      case value :: Remainder if previousOption.isEmpty =>
-      
+      case value :: remainder if previousOption.isEmpty =>
+        // Add value to the "UNSPECIFIED" key
         val updatedMap = map + ("UNSPECIFIED" -> (map.getOrElse("UNSPECIFIED", List()) :+ value))
-        ParseArgument(updatedMap, "", Remainder)
+        ParseArgument(updatedMap, "", remainder)
+      case _ =>
+        println("Unhandled input")
+        Map("error" -> List("Invalid argument")) // 기본적으로 error 메시지를 반환
     }
   }
 
+  logger.info(s"error")
 
-  private val masterChannel: ManagedChannel = {
-    ManagedChannelBuilder.forAddress(masterIp,masterport)
+  private val channel: ManagedChannel = {
+    ManagedChannelBuilder.forAddress("10.1.25.21" ,50051) // master ip and port
       .usePlaintext()
       .asInstanceOf[ManagedChannelBuilder[_]]
       .build
   }
 
-  
+  logger.info(s"err")
+
+
   // Get Samples 
   private def sendRegister: Future[Unit] = async {
-    val samples: List[Record] = await(this.samples)
-    val channel: ManagedChannel = channel
-    val stub: MasterGrpc.MasterStub = MasterGrpc.stub(channel)
+    logger.info(s"send register start")
+    val samples: List[Data] = await(this.samples)
+    logger.info(s"get sampels done")
+    val masterChannel: ManagedChannel = channel
+    val stub: MasterGrpc.MasterStub = MasterGrpc.stub(masterChannel)
+    logger.info(s"${NetworkConfig.ip}")
     val request: RegisterRequest = RegisterRequest(ip = NetworkConfig.ip, samples = samples)
     val response: Future[RegisterResponse] = stub.register(request)
-    try {
-      val responseIp = await(response).ip
+    // 추가 
+    response.onComplete {
+      case scala.util.Success(value) =>
+        logger.info(s"Register response received: $value")
+      case scala.util.Failure(exception) =>
+        logger.error("Failed to register with Master", exception)
+    }
+
+    logger.info(s"before respone")
+    val responseIp = await(response).ip
+    logger.info(s"after respone")
       if (responseIp != masterIp) {
         logger.error("response IP is not a masterIp")
         throw new IllegalStateException("response IP is not a masterIp")
       }
       logger.info(s"Sent Register Request to Master at $masterIp:${NetworkConfig.port}")
-    } catch {
-      case ex: Exception =>
-        logger.error(s"Failed to send Register Request: ${ex.getMessage}")
-        throw ex
-    }
+
     ()
   }
 
-  private val samples: Future[List[Record]] = DataProcess.getSamplesFromUnsorted
-  sendRegister 
+  private val samples: Future[List[Data]] = dataProcessor.getSamplesFromUnsorted
+  sendRegister
 
   // Shuffling 
   private def prepareRanges(): Future[(SortedMap[String, ByteString], List[String], List[ByteString])] = async {
@@ -108,35 +151,45 @@ object Worker extends App {
     (ranges, workerIps, rangeBegins)
   }
 
-  private def prepareData(): Future[(List[BufferedSource], List[Iterator[Record]])] = async {
-    val (bufferedSourceList, iteratorList) = await(DataProcess.getDataFromInputSorted).unzip
+  private def prepareData(): Future[(List[BufferedSource], List[Iterator[Data]])] = async {
+    val (bufferedSourceList, iteratorList) = await(dataProcessor.getDataFromInputSorted).unzip
     (bufferedSourceList, iteratorList)
   }
 
   private def prepareGrpcStubs(workerIps: List[String]): (List[ManagedChannel], List[WorkerGrpc.WorkerBlockingStub]) = {
+
     val workerChannels = workerIps.map { ip =>
-      ManagedChannelBuilder.forAddress(ip, NetworkConfig.port)
+      ManagedChannelBuilder.forAddress(ip,50052)
         .usePlaintext().asInstanceOf[ManagedChannelBuilder[_]].build
     }
+
+/*
+    val workerChannels = workers.map { case (ip, port) =>
+      ManagedChannelBuilder.forAddress(ip, port)
+        .usePlaintext()
+        .asInstanceOf[ManagedChannelBuilder[_]]
+        .build()
+    }
+    */
     val workerBlockingStubs = workerChannels.map(WorkerGrpc.blockingStub)
     (workerChannels, workerBlockingStubs)
   }
 
   private def distributeRecords(
-      iteratorList: List[Iterator[Record]],
+      iteratorList: List[Iterator[Data]],
       rangeBegins: List[ByteString],
       workerBlockingStubs: List[WorkerGrpc.WorkerBlockingStub]
   ): Unit = {
     @tailrec
-    def sendShuffleData(records: List[Record]): Unit = {
+    def sendShuffleData(records: List[Data]): Unit = {
       if (records.isEmpty) ()
       else {
         val designatedWorker = getDesignatedWorker(records.head, rangeBegins)
         val (dataToSend, remainder) = records.span(record => designatedWorker == getDesignatedWorker(record, rangeBegins))
 
         val blockingStub = workerBlockingStubs(designatedWorker)
-        val request = ShuffleRequest(ip = NetworkConfig.ip, records = dataToSend)
-        blockingStub.distribute(request)
+        val request = ShuffleRequest(ip = NetworkConfig.ip, data = dataToSend)
+        blockingStub.shuffle(request)
 
         sendShuffleData(remainder)
       }
@@ -147,14 +200,14 @@ object Worker extends App {
     }
   }
 
-  private def getDesignatedWorker(record: Record, rangeBegins: List[ByteString]): Int = {
+  private def getDesignatedWorker(record: Data, rangeBegins: List[ByteString]): Int = {
     val recordKey = record.key
     val blockingStubIdx = rangeBegins.lastIndexWhere(rangeBegin => recordKey >= rangeBegin)
     if (blockingStubIdx == -1) 0 else blockingStubIdx
   }
 
   private def closeBufferedSources(bufferedSourceList: List[BufferedSource]): Unit = {
-    bufferedSourceList.foreach(DataProcess.closeRecordsToDistribute)
+    bufferedSourceList.foreach { bufferedSource =>bufferedSource.close()}
   }
 
   private def shutdownChannels(workerChannels: List[ManagedChannel]): Unit = {
@@ -185,7 +238,7 @@ object Worker extends App {
     val masterChannel: ManagedChannel = channel
     val MasterStub: MasterGrpc.MasterStub = MasterGrpc.stub(masterChannel)
     val request: ShuffleCompleteRequest = ShuffleCompleteRequest(ip = NetworkConfig.ip)
-    val response: Future[ShuffleCompleteResponse] = stub.ShuffleComplete(request)
+    val response: Future[ShuffleCompleteResponse] = MasterStub.shuffleComplete(request)
 
     logger.info(s"Sent shuffle complete request to master")
     ()
@@ -194,21 +247,21 @@ object Worker extends App {
   private val ShuffleStartComplete: Promise[SortedMap[String, ByteString]] = Promise()
   private val ShuffleComplete: Future[Unit] = ShuffleData
   sendShuffleCompleteToMaster
-  
+
   // Merge Sort 
 
   private def MergeSort: Future[Unit] = async {
     await(MergeSortStartComplete.future)
     logger.info(s"Start Merge Sort")
-    DataProcess.MergeSortandSave()
+    dataProcessor.MergeSortandSave()
   }
 
   private def sendMergeSortCompleteToMaster: Future[Unit] = async {
     await(MergeSortComplete)
     val masterChannel: ManagedChannel = channel
     val masterStub: MasterGrpc.MasterStub = MasterGrpc.stub(masterChannel)
-    val request: SortCompleteRequest = SortCompleteRequest(ip = NetworkConfig.ip)
-    val response: Future[SortCompleteResponse] = masterStub.sortComplete(request)
+    val request: MergeSortCompleteRequest = MergeSortCompleteRequest(ip = NetworkConfig.ip)
+    val response: Future[MergeSortCompleteResponse] = masterStub.mergeSortComplete(request)
 
     logger.info(s"Merge Sort complete")
     await(response)
@@ -219,6 +272,15 @@ object Worker extends App {
   private val MergeSortStartComplete: Promise[Unit] = Promise()
   private val MergeSortComplete: Future[Unit] = MergeSort
   private val ShuffleAndMergeComplete: Future[Unit] = sendMergeSortCompleteToMaster
+
+
+  private val server = ServerBuilder.
+    forPort(50052)
+    .maxInboundMessageSize(4 * DataConfig.writeBlockSize)
+    .addService(WorkerGrpc.bindService(new WorkerImpl, ExecutionContext.global))
+    .asInstanceOf[ServerBuilder[_]]
+    .build
+    .start
 
   /* All the code above executes asynchronously.
    * As as result, this part of code is reached immediately.
@@ -238,17 +300,25 @@ object Worker extends App {
 
   // Worker 서비스 구현
   private class WorkerImpl extends WorkerGrpc.Worker {
-    override def StartShuffle(request: ShuffleStartRequest): Future[ShuffleStartResponse] = {
+    override def startShuffle(request: ShuffleStartRequest): Future[ShuffleStartResponse] = {
       logger.info(s"Start Shuffle with range: ${request.ranges}")
       ShuffleStartComplete success request.ranges.to(SortedMap)
       Future(ShuffleStartResponse())
     }
-    override def MergeSortStart(request: MergeSortStartRequest): Future[MergeSortStartResponse] = {
+
+    override def shuffle(request: ShuffleRequest): Future[ShuffleResponse] = {
+      val records = request.data
+      logger.info(s"Received ShuffleRequest")
+      dataProcessor saveDistributedData records
+      Future(ShuffleResponse())
+    }
+
+    override def mergeSortStart(request: MergeSortStartRequest): Future[MergeSortStartResponse] = {
       logger.info(s"Received Merge Sort Start Request")
       MergeSortStartComplete success ()
-      Future(MergeSortStartComplete())
+      Future(MergeSortStartResponse())
     }
-    
   }
-  
+
 }
+

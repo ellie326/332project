@@ -50,7 +50,7 @@ object Worker extends App {
   //  (ip, port)
   //}
 
-  private val masterIp: String = "10.1.25.21"
+  private val masterIp: String = NetworkConfig.ip
   private val masterPort: Int = 50051
 
   private def CheckAndParseArgument(args: List[String]): Map[String, List[String]] = {
@@ -296,7 +296,7 @@ object Worker extends App {
     server.shutdown()
   }
 
-  server.awaitTermination()
+
 
   // Worker 서비스 구현
   private class WorkerImpl extends WorkerGrpc.Worker {
@@ -321,4 +321,3 @@ object Worker extends App {
   }
 
 }
-

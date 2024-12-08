@@ -75,7 +75,7 @@ object Worker extends App {
 
       case value :: remainder if previousOption.nonEmpty =>
         val updatedMap = map + (previousOption -> (map.getOrElse(previousOption, List()) :+ value))
-        ParseArgument(updatedMap, "", remainder)
+        ParseArgument(updatedMap, previousOption, remainder)
 
       case value :: remainder if previousOption.isEmpty =>
         val updatedMap = map + ("UNSPECIFIED" -> (map.getOrElse("UNSPECIFIED", List()) :+ value))

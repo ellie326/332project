@@ -43,8 +43,8 @@ tar -xvf gensort-linux-1.5.tar.gz
 각 worker 내부에서 저장한 partition 값 들을 합쳐서 valsort 를 사용해 확인해주었다. 아래의 명령어를 순서대로 실행한다. 
 
 ```
-cd [output data directory/output_dir/]
+cd [output data directory]/output_dir/
 cat partition* >result
 cd ~
-./64/valsort -o result.sum [output data directory/result] 
+./64/valsort -o result.sum [output data directory]/result
 ```

@@ -36,7 +36,7 @@ object Worker extends App {
   private val outputDirectory: String = arguments("-O").head
   private val masterIp: String = arguments("masterip").head
   private val masterPort: String = arguments("masterport").head
-  logger.info(s"masterIP : $masterIP, masterPort : $masterPort")
+  logger.info(s"masterIP : $masterIp, masterPort : $masterPort")
   logger.info(s"argumnents parsed")
 
 
@@ -110,7 +110,7 @@ object Worker extends App {
         logger.info(s"Register response received: $value")
 
       case scala.util.Failure(exception) =>
-        assert(condition = false, s"Failed to register with Master: ${exception.getMessage}")
+        assert(false, s"Failed to register with Master: ${exception.getMessage}")
     }
 
     val responseIp = await(response).ip

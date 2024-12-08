@@ -87,7 +87,7 @@ object Worker extends App {
   }
 
   private val channel: ManagedChannel = {
-    ManagedChannelBuilder.forAddress(masterIp ,masterPort) // master ip and port
+    ManagedChannelBuilder.forAddress(masterIp ,masterPort.toInt) // master ip and port
       .usePlaintext()
       .asInstanceOf[ManagedChannelBuilder[_]]
       .build

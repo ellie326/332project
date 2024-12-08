@@ -6,7 +6,7 @@
 worker machine 에서 아래의 명령어를 순서대로 실행시키고 나면 .../64/input.txt 라는 파일이 생성된다. 
 
 ```
-cd ./332project 
+cd ~ 
 wget https://www.ordinal.com/try.cgi/gensort-linux-1.5.tar.gz
 tar -xvf gensort-linux-1.5.tar.gz 
 cd 64
@@ -20,7 +20,12 @@ sbt run
 ```
 
 ### EXECUTION 
-
+(만약 gensort 를 하지 않았다면 아래의 명령어 실행 필요 -- valsort 함수를 실행시키기 위함) 
+```
+cd ~ 
+wget https://www.ordinal.com/try.cgi/gensort-linux-1.5.tar.gz
+tar -xvf gensort-linux-1.5.tar.gz
+```
 먼저 master 머신을 실행시켜야 한다. 아래의 명령어를 입력하여 master machine 이 입력을 대기받도록 한다. 
 
 ```

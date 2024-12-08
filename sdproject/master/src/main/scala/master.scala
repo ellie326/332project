@@ -48,13 +48,7 @@ object Master extends App {
   println(s"Master is running at ${NetworkConfig.ip}:$masterPort and waiting for $workerNum workers...")
 
 
-
-
-
   private val CompleteAllRegister : Promise[Unit] = Promise()
-
-
-
 
   logger.info(s"worker data starts")
   private val workerData: Future[(List[String], List[ByteString])] = getWorkerData
@@ -94,7 +88,7 @@ object Master extends App {
 
     channels
   }
-  logger.info(s"start")
+  logger.info(s"Project start")
 
   sendShuffleStart
 
@@ -118,17 +112,15 @@ object Master extends App {
 
   blocking{
     Await.result(CompleteAllMergesort.future, Duration.Inf)
+    logger.info(s"All Merge Sort Complete!")
   }
 
-  logger.info(s"All Merge Sort Complete!")
   blocking{
     Await.result(workerChannels,Duration.Inf).foreach(_.shutdown())
   }
   server.shutdown()
+
   private val result: List[MergeSortCompleteRequest]= sortCompleteRequests.asScala.toList
-
-
-
 
   // gRPC 서비스 구현
   private class MasterImpl extends MasterGrpc.Master {

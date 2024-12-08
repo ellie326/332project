@@ -14,7 +14,7 @@ lazy val commonSettings = Seq(
     "org.scala-lang.modules" %% "scala-async" % "1.0.1",
     "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided,
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
-    "ch.qos.logback" % "logback-classic" % "1.3.11", // Must use 1.3.X to run properly on JDK 8
+    "ch.qos.logback" % "logback-classic" % "1.3.11",
     "org.scalatest" %% "scalatest" % "3.2.17" % "test"
   ),
   scalacOptions ++= Seq(

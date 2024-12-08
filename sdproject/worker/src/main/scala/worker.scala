@@ -29,7 +29,11 @@ import com.orange.network.NetworkConfig
 
 object Worker extends App {
   implicit val ec: ExecutionContext = ExecutionContext.global
+  private val ip: String = "2.2.2.101"
+  private val port: Int = 50052
   private val logger: Logger = Logger("Worker")
+
+  // argument parsing
   logger.info(s"Start parsing the argument")
   private val arguments: Map[String, List[String]] = CheckAndParseArgument(args.toList)
   private val inputDirectories: List[String] = arguments("-I")
@@ -39,39 +43,31 @@ object Worker extends App {
   logger.info(s"masterIP : $masterIp, masterPort : $masterPort")
   logger.info(s"argumnents parsed")
 
-
   private val dataProcessor : DataProcess = new DataProcess(inputDirectories,outputDirectory)
 
-  private val ip: String = "2.2.2.101"
-  private val port: Int = 50052
-
-
+  // 파싱 실행 및 예외 처리
   private def CheckAndParseArgument(args: List[String]): Map[String, List[String]] = {
+    // 예외처리: 인자 개수, 잘못된 인자
     assert(args.nonEmpty, s"Too few arguments: ${args.length}")
-
     val parsedArgs = ParseArgument(Map(), "", args)
     assert(parsedArgs.contains("-O") && parsedArgs("-O").length == 1, s"Invalid arguments: $parsedArgs")
-
     parsedArgs
   }
 
-
+  // 파싱 처리
   @scala.annotation.tailrec
   private def ParseArgument(map: Map[String, List[String]], previousOption: String, args: List[String]): Map[String, List[String]] = {
     args match {
       case Nil => map
 
-      case arg :: remainder if arg.matches("""\d+\.\d+\.\d+\.\d+:\d+""") =>
-        // IP:PORT 형식의 첫 번째 인자를 처리
+      case arg :: remainder if arg.matches("""\d+\.\d+\.\d+\.\d+:\d+""") => // IP:PORT 형식의 첫 번째 인자를 처리
         val Array(ip, port) = arg.split(":")
         val updatedMap = map + ("masterip" -> List(ip), "masterport" -> List(port))
         ParseArgument(updatedMap, previousOption, remainder)
 
-      case "-I" :: remainder =>
-        ParseArgument(map, "-I", remainder)
+      case "-I" :: remainder => ParseArgument(map, "-I", remainder)
 
-      case "-O" :: remainder =>
-        ParseArgument(map, "-O", remainder)
+      case "-O" :: remainder => ParseArgument(map, "-O", remainder)
 
       case value :: remainder if previousOption.nonEmpty =>
         val updatedMap = map + (previousOption -> (map.getOrElse(previousOption, List()) :+ value))
@@ -80,22 +76,23 @@ object Worker extends App {
       case value :: remainder if previousOption.isEmpty =>
         val updatedMap = map + ("UNSPECIFIED" -> (map.getOrElse("UNSPECIFIED", List()) :+ value))
         ParseArgument(updatedMap, "", remainder)
+
       case _ =>
         println("Unhandled input")
-        Map("error" -> List("Invalid argument")) // 기본적으로 error 메시지를 반환
+        Map("error" -> List("Invalid argument"))
     }
   }
 
+  // grpc 채널 설정
   private val channel: ManagedChannel = {
     ManagedChannelBuilder.forAddress(masterIp ,masterPort.toInt) // master ip and port
       .usePlaintext()
       .asInstanceOf[ManagedChannelBuilder[_]]
       .build
   }
-
   logger.info(s"opened worker channel")
 
-  // Get Samples 
+  // 샘플링, 마스터에 register
   private def sendRegister: Future[Unit] = async {
     val samples: List[Data] = await(this.samples)
     logger.info(s"received samples")
@@ -119,10 +116,11 @@ object Worker extends App {
     ()
   }
 
+  // 샘플 데이터 비동기적으로 가져오고 send register
   private val samples: Future[List[Data]] = dataProcessor.getSamplesFromUnsorted
   sendRegister
 
-  // Shuffling 
+  // Shuffling
   private def prepareRanges(): Future[(SortedMap[String, ByteString], List[String], List[ByteString])] = async {
     val ranges = await(ShuffleStartComplete.future)
     val workerIps = ranges.keys.toList
@@ -136,12 +134,10 @@ object Worker extends App {
   }
 
   private def prepareGrpcStubs(workerIps: List[String]): (List[ManagedChannel], List[WorkerGrpc.WorkerBlockingStub]) = {
-
     val workerChannels = workerIps.map { ip =>
       ManagedChannelBuilder.forAddress(ip,50052)
         .usePlaintext().asInstanceOf[ManagedChannelBuilder[_]].build
     }
-    
     val workerBlockingStubs = workerChannels.map(WorkerGrpc.blockingStub)
     (workerChannels, workerBlockingStubs)
   }
@@ -165,7 +161,6 @@ object Worker extends App {
         sendShuffleData(remainder)
       }
     }
-
     blocking {
       iteratorList.foreach { iter => sendShuffleData(iter.toList) }
     }
@@ -202,7 +197,6 @@ object Worker extends App {
     ()
   }
 
-
   private def sendShuffleCompleteToMaster: Future[Unit] = async {
     await(ShuffleComplete)
 
@@ -219,8 +213,8 @@ object Worker extends App {
   private val ShuffleComplete: Future[Unit] = ShuffleData
   sendShuffleCompleteToMaster
 
-  // Merge Sort 
 
+  // Merge Sort
   private def MergeSort: Future[Unit] = async {
     await(MergeSortStartComplete.future)
     logger.info(s"Start Merge Sort")
@@ -244,7 +238,7 @@ object Worker extends App {
   private val MergeSortComplete: Future[Unit] = MergeSort
   private val ShuffleAndMergeComplete: Future[Unit] = sendMergeSortCompleteToMaster
 
-
+  // Worker 서버 시작
   private val server = ServerBuilder.
     forPort(50052)
     .maxInboundMessageSize(4 * DataConfig.writeBlockSize)
@@ -253,9 +247,6 @@ object Worker extends App {
     .build
     .start
 
-  /* All the code above executes asynchronously.
-   * As as result, this part of code is reached immediately.
-   */
   logger.info(s"Server started at ${NetworkConfig.ip}:${NetworkConfig.port}")
   blocking {
     Await.result(ShuffleAndMergeComplete, Duration.Inf)
@@ -266,7 +257,6 @@ object Worker extends App {
     println("Shutting down worker...")
     server.shutdown()
   }
-
 
 
   // Worker 서비스 구현
@@ -290,5 +280,4 @@ object Worker extends App {
       Future(MergeSortStartResponse())
     }
   }
-
 }

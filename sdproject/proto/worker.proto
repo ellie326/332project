@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-import "communication.proto"
-
-
-service Worker {
-  rpc distributeStart (DistributeStartRequest) returns (DistributeStartResponse);
-  rpc sortStart (SortStartRequest) returns (SortStartResponse);
-}

@@ -30,11 +30,13 @@ import com.orange.network.NetworkConfig
 object Worker extends App {
   implicit val ec: ExecutionContext = ExecutionContext.global
   private val logger: Logger = Logger("Worker")
+  logger.info(s"Start parsing the argument")
   private val arguments: Map[String, List[String]] = CheckAndParseArgument(args.toList)
-  logger.info(s"${NetworkConfig.ip}, here")
   private val inputDirectories: List[String] = arguments("-I")
   private val outputDirectory: String = arguments("-O").head
-  //private val workerNum = arguments("-N").head.toInt
+  private val masterIp: String = arguments("masterip").head
+  private val masterPort: String = arguments("masterport").head
+  logger.info(s"argumnents parsed")
 
 
   private val dataProcessor : DataProcess = new DataProcess(inputDirectories,outputDirectory)
@@ -42,28 +44,12 @@ object Worker extends App {
   private val ip: String = "2.2.2.101"
   private val port: Int = 50052
 
-  // 워커 IP 리스트와 기본 포트 설정
-  //val workerIps = List("2.2.2.101", "2.2.2.102", "2.2.2.103")
-  //val basePort = 50051
-  //val workers = workerIps.zipWithIndex.map { case (ip, idx) =>
-  //  val port = basePort + idx // 인덱스를 이용해 고유 포트 생성
-  //  (ip, port)
-  //}
-
-  private val masterIp: String = NetworkConfig.ip
-  private val masterPort: Int = 50051
 
   private def CheckAndParseArgument(args: List[String]): Map[String, List[String]] = {
-    if (args.isEmpty) {
-      logger.warn(s"Too few arguments: ${args.length}")
-      sys.exit(1)
-    }
+    assert(args.nonEmpty, s"Too few arguments: ${args.length}")
 
     val parsedArgs = ParseArgument(Map(), "", args)
-    if (!parsedArgs.contains("-O") || parsedArgs("-O").length != 1) {
-      logger.warn(s"Invalid arguments: $parsedArgs")
-      sys.exit(1)
-    }
+    assert(parsedArgs.contains("-O") && parsedArgs("-O").length == 1, s"Invalid arguments: $parsedArgs")
 
     parsedArgs
   }
@@ -74,22 +60,23 @@ object Worker extends App {
     args match {
       case Nil => map
 
+      case arg :: remainder if arg.matches("""\d+\.\d+\.\d+\.\d+:\d+""") =>
+        // IP:PORT 형식의 첫 번째 인자를 처리
+        val Array(ip, port) = arg.split(":")
+        val updatedMap = map + ("masterip" -> List(ip), "masterport" -> List(port))
+        ParseArgument(updatedMap, previousOption, remainder)
+
       case "-I" :: remainder =>
         ParseArgument(map, "-I", remainder)
 
       case "-O" :: remainder =>
         ParseArgument(map, "-O", remainder)
 
-      //case "-N" :: remainder => // -P 옵션 추가
-        //ParseArgument(map, "-N", remainder)
-
       case value :: remainder if previousOption.nonEmpty =>
-        // Wrap `value` in a List to match the map type
         val updatedMap = map + (previousOption -> (map.getOrElse(previousOption, List()) :+ value))
         ParseArgument(updatedMap, "", remainder)
 
       case value :: remainder if previousOption.isEmpty =>
-        // Add value to the "UNSPECIFIED" key
         val updatedMap = map + ("UNSPECIFIED" -> (map.getOrElse("UNSPECIFIED", List()) :+ value))
         ParseArgument(updatedMap, "", remainder)
       case _ =>
@@ -98,8 +85,6 @@ object Worker extends App {
     }
   }
 
-  logger.info(s"error")
-
   private val channel: ManagedChannel = {
     ManagedChannelBuilder.forAddress("10.1.25.21" ,50051) // master ip and port
       .usePlaintext()
@@ -107,36 +92,29 @@ object Worker extends App {
       .build
   }
 
-  logger.info(s"err")
-
+  logger.info(s"opened worker channel")
 
   // Get Samples 
   private def sendRegister: Future[Unit] = async {
-    logger.info(s"send register start")
     val samples: List[Data] = await(this.samples)
-    logger.info(s"get sampels done")
+    logger.info(s"received sampels")
+
     val masterChannel: ManagedChannel = channel
     val stub: MasterGrpc.MasterStub = MasterGrpc.stub(masterChannel)
-    logger.info(s"${NetworkConfig.ip}")
     val request: RegisterRequest = RegisterRequest(ip = NetworkConfig.ip, samples = samples)
     val response: Future[RegisterResponse] = stub.register(request)
-    // 추가 
+
     response.onComplete {
       case scala.util.Success(value) =>
         logger.info(s"Register response received: $value")
+
       case scala.util.Failure(exception) =>
-        logger.error("Failed to register with Master", exception)
+        assert(condition = false, s"Failed to register with Master: ${exception.getMessage}")
     }
 
-    logger.info(s"before respone")
     val responseIp = await(response).ip
-    logger.info(s"after respone")
-      if (responseIp != masterIp) {
-        logger.error("response IP is not a masterIp")
-        throw new IllegalStateException("response IP is not a masterIp")
-      }
-      logger.info(s"Sent Register Request to Master at $masterIp:${NetworkConfig.port}")
-
+    assert(responseIp == masterIp, "response IP is not a masterIp")
+    logger.info(s"received register response from master $responseIp")
     ()
   }
 
@@ -162,15 +140,7 @@ object Worker extends App {
       ManagedChannelBuilder.forAddress(ip,50052)
         .usePlaintext().asInstanceOf[ManagedChannelBuilder[_]].build
     }
-
-/*
-    val workerChannels = workers.map { case (ip, port) =>
-      ManagedChannelBuilder.forAddress(ip, port)
-        .usePlaintext()
-        .asInstanceOf[ManagedChannelBuilder[_]]
-        .build()
-    }
-    */
+    
     val workerBlockingStubs = workerChannels.map(WorkerGrpc.blockingStub)
     (workerChannels, workerBlockingStubs)
   }

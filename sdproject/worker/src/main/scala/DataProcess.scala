@@ -105,9 +105,8 @@ class DataProcess(InputDirectories: List[String],OutputDirectory: String){
     */
 
     def getSamplesFromUnsorted: Future[List[Data]] = async {
-        logger.info(s"get samples from unsorted")
+        logger.info(s"Get samples from unsorted")
         await(SortInputData)
-        logger.info(s"after await")
         if (InputPaths.isEmpty) {
             logger.info(s"Input path is empty")
             List()
@@ -117,7 +116,7 @@ class DataProcess(InputDirectories: List[String],OutputDirectory: String){
             val samples = Using(fileContent) { _ =>
             dataIterator.take(DataConfig.num_sample).toList
             }.getOrElse(Nil)
-            logger.info(s"Sampling Completed. ${samples.length} sampels had been considered")
+            logger.info(s"Sampling Completed. ${samples.length} samples had been considered")
             samples
         }
     }

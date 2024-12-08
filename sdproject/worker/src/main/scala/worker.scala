@@ -280,7 +280,7 @@ object Worker extends App {
     override def shuffle(request: ShuffleRequest): Future[ShuffleResponse] = {
       val records = request.data
       logger.info(s"Received ShuffleRequest")
-      dataProcessor saveDistributedData records
+      dataProcessor saveShuffledData records
       Future(ShuffleResponse())
     }
 

@@ -9,8 +9,7 @@ import com.orange.proto.sort._
 import com.orange.proto.master._
 import com.orange.proto.worker._
 import java.net.NetworkInterface
-import scala.sys.process._ // 추가
-
+import scala.sys.process._
 
 
 import com.typesafe.scalalogging.LazyLogging

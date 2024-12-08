@@ -98,7 +98,7 @@ object Worker extends App {
   // Get Samples 
   private def sendRegister: Future[Unit] = async {
     val samples: List[Data] = await(this.samples)
-    logger.info(s"received sampels")
+    logger.info(s"received samples")
 
     val masterChannel: ManagedChannel = channel
     val stub: MasterGrpc.MasterStub = MasterGrpc.stub(masterChannel)

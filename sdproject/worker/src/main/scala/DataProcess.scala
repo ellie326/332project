@@ -150,7 +150,7 @@ class DataProcess(InputDirectories: List[String],OutputDirectory: String){
     private def saveData(directory: String, data: Seq[Data]): Unit={
 
         val num : Int = directoryHistory(directory).getAndIncrement()
-        val file: File = new File(directory + File.separator + f"partition$num")
+        val file: File = new File(directory + File.separator + f"partition$num%04d")
         val ArrayData : Array[Byte] = data.flatMap(Data => Data.key.toByteArray ++ Data.value.toByteArray).toArray
 
         Files.write(Paths.get(file.getPath), ArrayData)

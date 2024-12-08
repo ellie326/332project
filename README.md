@@ -1,63 +1,44 @@
-TESTING 할때만 실행 
-1. generate input
+### BUILD 
+먼저, worker maching 과 master machine 에서 `sbt assembly` 명령어를 입력하여 build 를 해준다. 
 
-worker 
-sbt assembly 
+
+### TESTING 할때만 실행 (gensort 사용 방법) 
+worker machine 에서 아래의 명령어를 순서대로 실행시키고 나면 .../64/input.txt 라는 파일이 생성된다. 
+
+```
 cd ./332project 
 wget https://www.ordinal.com/try.cgi/gensort-linux-1.5.tar.gz
 tar -xvf gensort-linux-1.5.tar.gz 
 cd 64
 ./gensort -a 100000 input.txt 
+```
 
--> 이렇게 하면 input.txt 에 input data 생성 
-
+그리고 generateInput 폴더의 main 함수를 실행하여 위에서 생성한 input.txt 를 file1.txt, file2.txt 등으로 잘라서 input 이라는 폴더에 저장해준다. 
+```
 cd ./sdproject/generateInput 
 sbt run 
+```
 
--> 위의 input.txt 를 같은 directory 의 input 폴더 안에 file1.txt, file2.txt 등등으로 나눠서 저장 
+### EXECUTION 
 
-2. sbt assemble for both master and worker
-master 
-sbt assembly 
+먼저 master 머신을 실행시켜야 한다. 아래의 명령어를 입력하여 master machine 이 입력을 대기받도록 한다. 
 
-worker 
-sbt assembly 
-
-3. start sorting 
-master
+```
 java -jar master.jar [num of worker]
+```
 
-worker 
-각 worker machine 에서 (ssh -XYC 2.2.2.101 or SSH -XYC 2.2.2.102 ...) 
-java -jar worker.jar 10.2.~~:50051 -I /home/orange/64/input -O /home/orange/[test num]/output_dir
+그리고 각 worker machine 을 실행시키기 위해서 아래의 명령어를 한 문장씩 입력한다. 
+```
+ssh -XYC [worker ip]
+java -jar worker.jar 10.1.25.21:50051 -I [input data directory] -O [output data directory] 
+```
 
-4. combine the output result
+### Checking (intra machine checking) 
+각 worker 내부에서 저장한 partition 값 들을 합쳐서 valsort 를 사용해 확인해주었다. 아래의 명령어를 순서대로 실행한다. 
 
-worker 
-각 worker 내부에서 
-cd ./[test num]/output_dir
-cat partition* > result 
-
-master 
-cd ./332project/sdproject/transfer 
-sbt compile 
-sbt run [worker 결과들을 저장할 파일 경로] 
-"Enter number: " 나오면 "2" enter 
-그러면 대기 상태 진입 
-
-worker 
-master 에서 나온 "Received Merge Sort Complete Request from ${request.ip}" 의 worker 순서대로 아래 실행 
-cd ./332project/sdproject/transfer 
-sbt compile 
-sbt run 
-"Enter number: " 나오면 "1" enter 
-
-5. check the output result
-master 
-cat result* > final_result 
-./valsort -o final.sum ./332project/sdproject/final_result 
-
-
-
-
-
+```
+cd [output data directory]
+cat partition* >result
+cd ~
+./64/valsort -o result.sum [output data directory/result] 
+```

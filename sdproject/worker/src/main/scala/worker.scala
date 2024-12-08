@@ -36,6 +36,7 @@ object Worker extends App {
   private val outputDirectory: String = arguments("-O").head
   private val masterIp: String = arguments("masterip").head
   private val masterPort: String = arguments("masterport").head
+  logger.info(s"masterIP : $masterIP, masterPort : $masterPort)
   logger.info(s"argumnents parsed")
 
 

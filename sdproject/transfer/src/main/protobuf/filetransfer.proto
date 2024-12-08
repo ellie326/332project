@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package filetransfer;
+
+service FileTransferService {
+  rpc SendFile(FileChunk) returns (Ack);
+}
+
+message FileChunk {
+  string filename = 1;
+  bytes data = 2;
+}
+
+message Ack {
+  string message = 1;
+}

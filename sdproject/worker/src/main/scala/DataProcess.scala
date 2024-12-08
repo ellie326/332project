@@ -45,11 +45,10 @@ class DataProcess(InputDirectories: List[String],OutputDirectory: String){
     InitializeDirectory(DistributedDirectory)
 
     private val InputPaths: List[String] = InputDirectories.map(getPaths).flatten
-    private val SortInputData: Future[List[Unit]] = Future.traverse(InputPaths){ path=> 
-        Future{
-            InternalSortComplete(path,SortedInputDirectory)
-        }
-    }
+    private val SortInputData: Future[List[Unit]] = Future.sequence(InputPaths map( path=>
+        Future {
+            InternalSortComplete(path, SortedInputDirectory)
+        }))
 
 
     logger.info(s"Input Directory Initialized: $SortedInputDirectory")
@@ -81,14 +80,7 @@ class DataProcess(InputDirectories: List[String],OutputDirectory: String){
         await(SortInputData)
         val SortedInputFilePaths : List[String] = getPaths(SortedInputDirectory)
 
-        val DataBuffer=ListBuffer.empty[(BufferedSource,Iterator[Data])]
-
-        SortedInputFilePaths.foreach{path=>
-            DataBuffer += getData(path)
-        }
-
-        val result: List[(BufferedSource, Iterator[Data])] = DataBuffer.toList
-        result
+        SortedInputFilePaths map getData
     }
 
 
@@ -137,17 +129,14 @@ class DataProcess(InputDirectories: List[String],OutputDirectory: String){
     //file에서 몇개의 sample들을 추출, 뭔가 file에서 가져오면 string 형태가 될텐데 이걸 Data structure에 맞게 변형하는 함수가 필요할듯
     private def getData(fileName: String): (BufferedSource, Iterator[Data])={
         val fileContent: BufferedSource = scala.io.Source.fromFile(fileName,"ISO-8859-1")
-        val dataIterator: Iterator[Data] = fileContent.getLines()
-            .flatMap{line => 
-                line.grouped(DataConfig.length_data)
-                    .map(ConvertToData)
-            }
+        val dataIterator: Iterator[Data] = fileContent.grouped(DataConfig.length_data) map ConvertToData
+
         (fileContent, dataIterator)
     }
 
     //string을 Data에 맞게 변형
-    private def ConvertToData(str: String): Data={
-        val EntireByte: Array[Byte] = str.getBytes("ISO-8859-1")
+    private def ConvertToData(chr: Seq[Char]): Data={
+        val EntireByte: Array[Byte] = chr.map(_.toByte).toArray
         val key: ByteString = ByteString.copyFrom(EntireByte.take(DataConfig.length_key))
         val value: ByteString = ByteString.copyFrom(EntireByte.drop(DataConfig.length_key))
         Data(key,value)

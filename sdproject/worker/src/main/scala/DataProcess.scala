@@ -21,9 +21,6 @@ import com.typesafe.scalalogging.Logger
 import scala.collection.mutable.ListBuffer
 import scala.util.Using
 
-
-
-
 class DataProcess(InputDirectories: List[String],OutputDirectory: String){
     private val logger: Logger = Logger("DataProcess")
 
@@ -87,22 +84,6 @@ class DataProcess(InputDirectories: List[String],OutputDirectory: String){
     //sample들을 반환하는 함수, 원래 교수님이 제시하신 방법은 unsorted된 data에서 sampling
     //우리도 일단 그렇게 구현하는걸 목표로
     //getSamples가 worker machine에서 호출되어 sampling된 data 반환
-    /*
-    def getSamplesFromUnsorted: Future[List[Data]]=async{
-        await(SortInputData)
-        if(InputPaths.isEmpty){
-            List()
-        }
-        else{
-            val path=InputPaths.head
-            val samples: List[Data] = Using(getData(path)._1){fileContent =>
-                val dataIterator:Iterator[Data] = getData(path)._2
-                dataIterator.take(DataConfig.num_sample).toList
-            }.getOrElse(Nil)
-            samples
-        }
-    }
-    */
 
     def getSamplesFromUnsorted: Future[List[Data]] = async {
         logger.info(s"Get samples from unsorted")
@@ -121,7 +102,7 @@ class DataProcess(InputDirectories: List[String],OutputDirectory: String){
         }
     }
 
-    def saveDistributedData(records: Seq[Data]): Unit = {
+    def saveShuffledData(records: Seq[Data]): Unit = {
         saveData(DistributedDirectory, records)
     }
 
